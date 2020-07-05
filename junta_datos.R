@@ -1,5 +1,3 @@
-#setwd("datos_abiertos_covid/")
-
 serie=list()
 
 testos<-dir()[grep(".csv",dir())]
