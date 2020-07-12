@@ -36,7 +36,7 @@ ultimo_registro<-unique(filter(datos_juntos,Dia_registro==max(datos_juntos$Dia_r
 ultimo_registro$Nombre_Estado<-NA
 ultimo_registro$Abreviatura<-NA
 
-claves_estados<-read.csv("../claves_edos.csv")
+claves_estados<-read.csv("../claves_edos.csv",encoding = "UTF-8")
 
 for (k in (1:length(claves_estados$CLAVE_ENTIDAD))){
   x<-which(datos_resumidos$ESTADO==k)
@@ -50,5 +50,3 @@ for (k in (1:length(claves_estados$CLAVE_ENTIDAD))){
 registro_DEP_COVID<-filter(ultimo_registro,RESULTADO==1,!FECHA_DEF=="9999-99-99")
 
 rm(i,testos,x,y,serie)
-
-setwd("..")

@@ -2,30 +2,13 @@ library(ggplot2)
 require(ggrepel)
 library(RColorBrewer)
 
-#options(encoding = "UTF-8")
-
 decesos_registrados<-as.data.frame(decesos_registrados)
-
-#COleccion de gráficas para fecha fija de defunción, cómo se van reportando
-
-# g<-list()
-# 
-# for(fecha in unique(decesos_registrados$FECHA_DEF)){
-#     t<-as.integer(as.Date(hoy)-as.Date(fecha))
-#     g[[fecha]]<-ggplot(filter(decesos_registrados,FECHA_DEF==fecha),aes(desfase,Decesos_contados))+geom_line()+
-#     geom_point(color="blue",size=3.1)+
-#     ggtitle(paste("Decesos ocurridos en el día ",fecha))+
-#   xlab("Dias transcurridos desde el evento")+ylab("Decesos Registrados")+scale_x_continuous(breaks=seq(0,t,1))
-# }  
-
-#para armar las gráficas comparativas anunciados vs contados después
 
 compara_acumulados<-ggplot(contados_recientes,aes(acumulados.anunciados,acumulados_contados))+
   geom_point()+geom_line()+geom_segment(x=0,y=0,xend=max(contados_recientes$acumulados_contados),
                                         yend=max(contados_recientes$acumulados_contados),size=2,color="green")+
   xlab("Decesos acumulados anunciados en conferencia vespertina")+ylab("Decesos registrados del dìa en base actualizada")+
   ggtitle(paste("Decesos acumulados por  COVID-19. México.",as.character(hoy)))
-
 
 acumulados_dos_conteos_log<-ggplot(contados_recientes)+geom_point(aes(Dia_Def,log(acumulados.anunciados)),color="blue")+
   geom_point(aes(Dia_Def,log(acumulados_contados)),color="green")+
@@ -39,7 +22,6 @@ acumulados_dos_conteos<-ggplot(filter(acumulados_varios_,!tipo=="Estimados"),aes
 
 acumulados_tres_conteos<-ggplot(acumulados_varios_,aes(as.Date(FECHA_DEF),acumulados,color=tipo))+
   geom_point(size=2.3)+geom_line()+ggtitle(paste("Decesos acumulados por COVID",hoy))+xlab("Fecha")+ylab("Decesos")
-
 
 acumulados_tres_conteos_log<-ggplot(acumulados_varios_,aes(as.Date(FECHA_DEF),log(acumulados),color=tipo))+
   geom_point(size=2.1)+geom_line()+ggtitle(paste("Decesos acumulados por COVID en México. Escala log.",hoy))+xlab("Fecha")+ylab("Decesos")
@@ -149,6 +131,16 @@ totales<-function(x){
   grafica<-ggplot(datasas,
                   aes(as.Date(FECHA_DEF),acumulados_estimados,color=Estado))+geom_line(size=0.85)+geom_point()+
     xlab("Fecha")+ylab("Acumulados estimados")+ggtitle("Decesos Covid")
+  
+  return(grafica)
+}
+
+totales_log<-function(x){
+  considerados<-x
+  datasas<-filter(juntos_estados,Abreviatura%in%considerados,as.Date(FECHA_DEF)>"2020-04-15")
+  grafica<-ggplot(datasas,
+                  aes(as.Date(FECHA_DEF),log(acumulados_estimados),color=Estado))+geom_line(size=0.85)+geom_point()+
+    xlab("Fecha")+ylab("Acumulados estimados (log)")+ggtitle("Decesos Covid")
   
   return(grafica)
 }
