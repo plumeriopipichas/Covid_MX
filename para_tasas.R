@@ -53,8 +53,39 @@ agrega_diagonal<-function(datos,eles,inicio,ajuste){
   return(B)
 }
 
+agrega_diagonal_<-function(datos,eles,inicio){
+  B<-as.data.frame(datos)
+  for (k in inicio:ncol(datos)){
+    columna<-k
+    renglon<-nrow(B)-k+inicio
+    pre<-numeric()
+    pos<-numeric()
+    for (j in (renglon-(eles)):(renglon-1)){
+      peso<-1
+      if (renglon%%7==j%%7){
+        peso<-2*peso
+      }
+      if (renglon-j<8){
+        peso<-2*peso
+      }
+      if (abs(B[(renglon-j),(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.1){
+        peso<-2*peso
+      }
+      if (abs(B[(renglon-j),(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.05){
+        peso<-2*peso
+      } 
+      pre<-c(pre,rep(B[(renglon-j),(columna-1)],peso))
+      pos<-c(pos,rep(B[(renglon-j),(columna)],peso))
+    }
+    fit<-lm(pos~pre)
+    prediccion<-fit$coefficients[2]*B[renglon,columna-1]+fit$coefficients[1]
+    B[renglon,columna]<-max(prediccion,B[renglon,columna-1])
+  }
+  return(B)
+}
+
 for (k in 3:ncol(estimacion_decesos)){
-  estimacion_decesos<-agrega_diagonal(estimacion_decesos,7,k,ajuste)
+  estimacion_decesos<-agrega_diagonal_(estimacion_decesos,11,k)
 }
 
 x<-which(contados_recientes$FECHA_DEF=="2020-04-12")
@@ -90,8 +121,6 @@ for (j in 6:x){
 }
 
 estimacion_decesos<-mutate(estimacion_decesos,suave_duplex=4*log(2)/log(tasa_suave))
-
-#estimacion_decesos<-estimacion_decesos[-nrow(estimacion_decesos) ,]
 
 acumulados_varios_<-select(estimacion_decesos,FECHA_DEF,acumulados=acumulados_estimados)
 acumulados_varios_$tipo<-as.factor("Estimados")

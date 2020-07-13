@@ -10,7 +10,6 @@ fechas<-unique(filter(contados_recientes,as.Date(FECHA_DEF)>"2020-04-11",as.Date
 for (k in unique(datos_resumidos$Abreviatura)){
   datos_resumidos_edo[[k]]<-filter(datos_resumidos,Abreviatura==k)
   decesos_por_dia_estado[[k]]<-filter(reg_diarios_decesos,Abreviatura==k)
-  print(class(decesos_por_dia_estado[[k]]))
   por_fechas<-group_by(decesos_por_dia_estado[[k]],Dia_registro,FECHA_DEF)
   decesos_registrados_edos[[k]] <- summarise(por_fechas,Decesos_contados=n())
   decesos_registrados_edos[[k]]$Estado<-datos_resumidos_edo[[k]]$Nombre_Estado[1]
@@ -28,8 +27,6 @@ for (k in unique(datos_resumidos$Abreviatura)){
 
   for (fecha in fechas){
     if(!fecha %in% contados_recientes_edos[[k]]$FECHA_DEF){
-      #print(fecha)
-      #print(k)
       fila_extra<-data.frame(Dia_Registro=d,FECHA_Def=fecha,nuevos=0,Estado=contados_recientes_edos[[k]]$Estado[1],
                              desfase=d-1,Dia_Def=26)
       names(fila_extra)<-names(contados_recientes_edos[[k]])
@@ -82,7 +79,7 @@ for (k in unique(datos_resumidos$Abreviatura)){
   for (j in 3:ncol(estimacion_decesos_edos[[k]])){
     print(j)
     print(k)
-    estimacion_decesos_edos[[k]]<-agrega_diagonal(estimacion_decesos_edos[[k]],7,j,ajuste)
+    estimacion_decesos_edos[[k]]<-agrega_diagonal_(estimacion_decesos_edos[[k]],11,j)
   }
 
   x<-which(contados_recientes_edos[[k]]$FECHA_DEF=="2020-04-12")
