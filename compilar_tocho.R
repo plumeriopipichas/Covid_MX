@@ -1,7 +1,7 @@
 library(dplyr)
 library(ggplot2)
 
-hoy<-"2020-07-10"
+hoy<-"2020-07-13"
 
 setwd("datos_abiertos_covid")
 
