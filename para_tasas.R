@@ -38,29 +38,29 @@ rm(a,x,chequeo,filas,columnas,cols,rous)
 
 #------fin bustrap----
 
-agrega_diagonal<-function(datos,eles,inicio,ajuste){
-  B<-as.data.frame(datos)
-  for (k in inicio:ncol(datos)){
-    columna<-k
-    renglon<-nrow(B)-k+inicio
-    a<-B[(renglon-(eles)):(renglon-1),(columna-1):columna]
-    a[1,2]<-2*a[1,2]
-    #a[eles,2]<-2*a[eles,2]
-    a[ ,2]<-a[ ,2]+0.85
-    a[ ,1]<-a[ ,1]+1.15
-    B[renglon,columna]<-max(B[renglon,columna-1]*sum(a[ ,2]/a[ ,1])/8,B[renglon,columna-1])
-  }
-  return(B)
-}
+# agrega_diagonal<-function(datos,eles,inicio,ajuste){
+#   B<-as.data.frame(datos)
+#   for (k in inicio:ncol(datos)){
+#     columna<-k
+#     renglon<-nrow(B)-k+inicio
+#     a<-B[(renglon-(eles)):(renglon-1),(columna-1):columna]
+#     a[1,2]<-2*a[1,2]
+#     #a[eles,2]<-2*a[eles,2]
+#     a[ ,2]<-a[ ,2]+0.85
+#     a[ ,1]<-a[ ,1]+1.15
+#     B[renglon,columna]<-max(B[renglon,columna-1]*sum(a[ ,2]/a[ ,1])/8,B[renglon,columna-1])
+#   }
+#   return(B)
+# }
 
 agrega_diagonal_<-function(datos,eles,inicio){
   B<-as.data.frame(datos)
   for (k in inicio:ncol(datos)){
     columna<-k
-    renglon<-nrow(B)-k+inicio
+    renglon<-nrow(B)-columna+inicio
     pre<-numeric()
     pos<-numeric()
-    for (j in (renglon-(eles)):(renglon-1)){
+    for (j in (renglon-eles):(renglon-1)){
       peso<-1
       if (renglon%%7==j%%7){
         peso<-2*peso
@@ -68,18 +68,23 @@ agrega_diagonal_<-function(datos,eles,inicio){
       if (renglon-j<8){
         peso<-2*peso
       }
-      if (abs(B[(renglon-j),(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.1){
+      if (abs(B[j,(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.1){
         peso<-2*peso
       }
-      if (abs(B[(renglon-j),(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.05){
+      if (abs(B[j,(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.05){
         peso<-2*peso
       } 
-      pre<-c(pre,rep(B[(renglon-j),(columna-1)],peso))
-      pos<-c(pos,rep(B[(renglon-j),(columna)],peso))
+      pre<-c(pre,rep(B[j,(columna-1)],peso))
+      
+      pos<-c(pos,rep(B[j,(columna)],peso))
     }
     fit<-lm(pos~pre)
     prediccion<-fit$coefficients[2]*B[renglon,columna-1]+fit$coefficients[1]
-    B[renglon,columna]<-max(prediccion,B[renglon,columna-1])
+    if (is.na(prediccion)){
+      print(pre)
+      print(pos)
+    }
+    B[renglon,columna]<-max(prediccion,B[renglon,columna-1],na.rm = TRUE)
   }
   return(B)
 }

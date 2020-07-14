@@ -24,7 +24,6 @@ for (k in unique(datos_resumidos$Abreviatura)){
                                        Dia_registro==d)
   contados_recientes_edos[[k]]<-ungroup(contados_recientes_edos[[k]])
 
-
   for (fecha in fechas){
     if(!fecha %in% contados_recientes_edos[[k]]$FECHA_DEF){
       fila_extra<-data.frame(Dia_Registro=d,FECHA_Def=fecha,nuevos=0,Estado=contados_recientes_edos[[k]]$Estado[1],
@@ -47,7 +46,6 @@ for (k in unique(datos_resumidos$Abreviatura)){
 
   para_la_estimacion_edos[[k]]<-filter(as.data.frame(decesos_registrados_edos[[k]]),Dia_Def>25,desfase>2)
 
-
   estimacion_decesos_edos[[k]]<-data.frame(FECHA_DEF=unique(para_la_estimacion_edos[[k]]$FECHA_DEF))
   for (j in 1:58){
     a<-filter(para_la_estimacion_edos[[k]],desfase==j+2)
@@ -62,26 +60,34 @@ for (k in unique(datos_resumidos$Abreviatura)){
         estimacion_decesos_edos[[k]]<-rbind(estimacion_decesos_edos[[k]],fila_extra)
     }
   }
-  estimacion_decesos_edos[[k]]<-arrange(estimacion_decesos_edos[[k]],FECHA_DEF)
-  estimacion_decesos_edos[[k]] <- estimacion_decesos_edos[[k]][1:(nrow(estimacion_decesos_edos[[k]])-4), ]
-  
-  for (i in 1:nrow(estimacion_decesos_edos[[k]])){
-    x<-which(is.na(estimacion_decesos_edos[[k]])[i, ])
-    estimacion_decesos_edos[[k]][i,x]<-0
-  }
-  
-  estimacion_decesos_edos[[k]] <- estimacion_decesos_edos[[k]][ ,-2]
+   estimacion_decesos_edos[[k]]<-arrange(estimacion_decesos_edos[[k]],FECHA_DEF)
+   estimacion_decesos_edos[[k]] <- estimacion_decesos_edos[[k]][1:(nrow(estimacion_decesos_edos[[k]])-4), ]
+   
+   for (i in 1:nrow(estimacion_decesos_edos[[k]])){
+     x<-which(is.na(estimacion_decesos_edos[[k]])[i, ])
+     estimacion_decesos_edos[[k]][i,x]<-0
+   }
+   
+   estimacion_decesos_edos[[k]] <- estimacion_decesos_edos[[k]][ ,-2]
+ 
+   for (j in 2:ncol(estimacion_decesos_edos[[k]])){
+     estimacion_decesos_edos[[k]][ ,j]<-as.numeric(estimacion_decesos_edos[[k]][,j])
+   }
 
-  for (j in 2:ncol(estimacion_decesos_edos[[k]])){
-    estimacion_decesos_edos[[k]][ ,j]<-as.numeric(estimacion_decesos_edos[[k]][,j])
-  }
+  nombre<-contados_recientes_edos[[k]]$Estado[1]
+  x<-which(retrasos_estado$Nombre_Estado==nombre)
+  eles<-ceiling(retrasos_estado$Retraso_Promedio[x]+min(7,retrasos_estado$st_d[x]))
+  print(k)
+  print(paste("eles",as.character(eles)))
 
-  for (j in 3:ncol(estimacion_decesos_edos[[k]])){
+  for (j in 4:ncol(estimacion_decesos_edos[[k]])){
     print(j)
-    print(k)
-    estimacion_decesos_edos[[k]]<-agrega_diagonal_(estimacion_decesos_edos[[k]],11,j)
+    estimacion_decesos_edos[[k]]<-agrega_diagonal_(estimacion_decesos_edos[[k]],eles,j)
+    #x<-estimacion_decesos_edos[[k]][nrow(estimacion_decesos_edos[[k]]),j]
+    #print(paste("valor nuevo",as.character(x)))
   }
-
+  rm(eles,nombre)
+  
   x<-which(contados_recientes_edos[[k]]$FECHA_DEF=="2020-04-12")
   x<-contados_recientes_edos[[k]]$acumulados_contados[x]
   ab<-rep(x,nrow(estimacion_decesos_edos[[k]]))
@@ -91,8 +97,6 @@ for (k in unique(datos_resumidos$Abreviatura)){
   }
 
    estimacion_decesos_edos[[k]]$acumulados_estimados<-ab
-
-
    estimacion_decesos_edos[[k]]$tasa_4dias<-NA
    estimacion_decesos_edos[[k]]$tasa_suave<-NA
 
