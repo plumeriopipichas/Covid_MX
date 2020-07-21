@@ -163,4 +163,58 @@ diarios_y_duplex<-function(x){
     xlab("")
 }
 
+diarios_2_estados<-function(a,b){
+  estado1<-estimacion_decesos_edos[[a]]
+  estado2<-estimacion_decesos_edos[[b]] 
+  n1<-estado1$Estado[1]
+  n2<-estado2$Estado[1]
+  ggplot()+geom_point(data=estado1,aes(as.Date(FECHA_DEF),por_dia_suave),color="blue")+
+    geom_line(data=estado1,aes(as.Date(FECHA_DEF),por_dia_suave),color="blue")+
+    geom_point(data=estado2,aes(as.Date(FECHA_DEF),por_dia_suave),color="brown")+
+    geom_line(data=estado2,aes(as.Date(FECHA_DEF),por_dia_suave),color="brown")+
+    geom_label_repel(data = estado1[nrow(estado1), ],aes(label=Estado),x=as.Date(hoy)+7,
+                    y=estado1$por_dia_suave[nrow(estado1)],color="blue",size=4)+
+                    geom_label_repel(data = estado2[nrow(estado1), ],aes(label=Estado),
+                    x=as.Date(hoy)+7,y=estado2$por_dia_suave[nrow(estado2)],
+                    color="brown",size=4)+xlim(as.Date("2020-04-11"),as.Date(hoy)+2)+
+                    ggtitle(paste(paste("Evolución Covid por dia        ",n1),paste(" y ", n2)))+
+                    ylab("Decesos estimados (promedio 4 dias)")+xlab("Fecha")
+}
+
+colorines<-c("blue","brown","purple","red")
+
+diarios_n_estados<-function(estados){
+  g<-ggplot()
+  contador<-0
+  titulo<-"Evolución Covid por dia.        "
+  ye<-numeric()
+  for (k in estados){
+    contador<-contador+1
+    estado<-estimacion_decesos_edos[[k]]
+    n1<-estado$Estado[1]
+    ye[contador]<-estado$por_dia_suave[nrow(estado)]
+    print(ye)
+    for (j in c(1:contador)){
+      if (ye[contador]-ye[j]<1.5 & ye[contador]-ye[j]>0){
+        ye[contador] <- ye[contador]+1  
+      }
+      if (ye[contador]-ye[j]>-1.5 & ye[contador]-ye[j]<0){
+        ye[contador] <- ye[contador]-1  
+      }
+    }
+    g<-g+geom_point(data=estado,aes(as.Date(FECHA_DEF),por_dia_suave),color=colorines[contador])+
+      geom_line(data=estado,aes(as.Date(FECHA_DEF),por_dia_suave),color=colorines[contador])+
+      geom_label_repel(data = estado[nrow(estado), ],aes(label=Estado),x=as.Date(hoy)+4,
+                       y=ye[contador],color=colorines[contador],size = 3.2)
+    #titulo<-paste(titulo,paste(n1,".",sep=""),"   ")  
+    print(contador)
+    print(n1)
+  }
+  g<-g+ggtitle(titulo)+
+    ylab("Decesos estimados (promedio 4 dias)")+xlab("Fecha")+xlim(as.Date("2020-04-11"),as.Date(hoy)+2)
+  return(g)
+}
+
+
+
 #rm(fecha)

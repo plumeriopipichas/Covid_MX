@@ -120,10 +120,9 @@ for (k in unique(datos_resumidos$Abreviatura)){
        0.25*estimacion_decesos_edos[[k]]$tasa_4dias[j+1]
    }
    estimacion_decesos_edos[[k]]$por_dia_suave<-estimacion_decesos_edos[[k]]$registros_dia_60
-   for (j in 8:x){
+   for (j in 8:nrow(estimacion_decesos_edos[[k]])){
      estimacion_decesos_edos[[k]]$por_dia_suave[j]<-
-       0.5*estimacion_decesos_edos[[k]]$registros_dia_60[j]+
-       0.5*mean(estimacion_decesos_edos[[k]]$registros_dia_60[(j-7):j])
+       mean(estimacion_decesos_edos[[k]]$registros_dia_60[(j-3):j])
    }
    estimacion_decesos_edos[[k]]<-mutate(estimacion_decesos_edos[[k]],suave_duplex=4*log(2)/log(tasa_suave))
 }
@@ -171,4 +170,5 @@ menor_pc<-arrange(estos_ultimos,per_capita)$Abreviatura[1:4]
 
 rm(temp,k,a,j,datos_resumidos_edo,decesos_por_dia_estado,para_la_estimacion_edos,ab,pegar_global)
 
+edos_pob<-arrange(poblacion,desc(Poblacion2010))
 
