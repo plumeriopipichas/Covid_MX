@@ -89,8 +89,9 @@ agrega_diagonal_<-function(datos,eles,inicio){
   return(B)
 }
 
+ele_general<-ceiling(mean(revisar_retrasos$Retraso)+sd(revisar_retrasos$Retraso))
 for (k in 3:ncol(estimacion_decesos)){
-  estimacion_decesos<-agrega_diagonal_(estimacion_decesos,11,k)
+  estimacion_decesos<-agrega_diagonal_(estimacion_decesos,ele_general,k)
 }
 
 x<-which(contados_recientes$FECHA_DEF=="2020-04-12")

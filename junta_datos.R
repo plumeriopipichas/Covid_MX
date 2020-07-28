@@ -1,5 +1,8 @@
 serie=list()
 
+#owid_covid<-read.csv(file="owid-covid-data.csv")
+
+
 testos<-dir()[grep(".csv",dir())]
 
 for (i in 1:length(testos)){
