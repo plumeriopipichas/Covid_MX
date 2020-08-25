@@ -1,40 +1,39 @@
-
 para_la_estimacion<-filter(as.data.frame(decesos_registrados),Dia_Def>25,desfase>2)
 estimacion_decesos<-data.frame(FECHA_DEF=unique(para_la_estimacion$FECHA_DEF))
 
 for (k in 1:58){
   a<-filter(para_la_estimacion,desfase==k+2)
     a<-select(a,FECHA_DEF,Decesos_contados)
-    estimacion_decesos<-merge(estimacion_decesos,a,by="FECHA_DEF",all.x = TRUE)  
+    estimacion_decesos<-merge(estimacion_decesos,a,by="FECHA_DEF",all.x = TRUE)
     names(estimacion_decesos)[k+1]<-paste("registros_dia_",as.character(k+2),sep="")
 }
 
 #-----bustrap inicio ------------------
 
-eles<-7
-chequeo<-numeric()
-columnas<-integer()
-filas<-integer()
-
-for (rous in 10:(nrow(estimacion_decesos)-1)){
-  for (cols in 3:min((nrow(estimacion_decesos)+2-rous),36)){
-    a<-estimacion_decesos[(rous-eles):(rous-1),(cols-1):cols]
-    x<-mean(a[,2]/a[ ,1])*estimacion_decesos[rous,cols-1]-estimacion_decesos[rous,cols]
-    chequeo<-append(chequeo,x)
-    columnas<-append(columnas,cols)
-    filas<-append(filas,rous)
-  }  
-}
-
-revisar_estimados<-data.frame(filas,columnas,diferencia=chequeo)
-por_desfase<-group_by(revisar_estimados,columnas)
-por_evento<-group_by(revisar_estimados,filas)
-por_desfase<-summarise(por_desfase,dif=mean(diferencia))
-por_evento<-summarise(por_evento,dif=mean(diferencia))
-
-ajuste<-c(0,0,por_desfase$dif)
-
-rm(a,x,chequeo,filas,columnas,cols,rous)
+# eles<-7
+# chequeo<-numeric()
+# columnas<-integer()
+# filas<-integer()
+# 
+# for (rous in 10:(nrow(estimacion_decesos)-1)){
+#   for (cols in 3:min((nrow(estimacion_decesos)+2-rous),36)){
+#     a<-estimacion_decesos[(rous-eles):(rous-1),(cols-1):cols]
+#     x<-mean(a[,2]/a[ ,1])*estimacion_decesos[rous,cols-1]-estimacion_decesos[rous,cols]
+#     chequeo<-append(chequeo,x)
+#     columnas<-append(columnas,cols)
+#     filas<-append(filas,rous)
+#   }  
+# }
+# 
+# revisar_estimados<-data.frame(filas,columnas,diferencia=chequeo)
+# por_desfase<-group_by(revisar_estimados,columnas)
+# por_evento<-group_by(revisar_estimados,filas)
+# por_desfase<-summarise(por_desfase,dif=mean(diferencia))
+# por_evento<-summarise(por_evento,dif=mean(diferencia))
+# 
+# ajuste<-c(0,0,por_desfase$dif)
+# 
+# rm(a,x,chequeo,filas,columnas,cols,rous)
 
 #------fin bustrap----
 
@@ -127,6 +126,12 @@ for (j in 6:x){
 }
 
 estimacion_decesos<-mutate(estimacion_decesos,suave_duplex=4*log(2)/log(tasa_suave))
+
+estimacion_decesos$por_dia_suave<-estimacion_decesos$registros_dia_60
+for (j in 8:nrow(estimacion_decesos)){
+  estimacion_decesos$por_dia_suave[j]<-
+    mean(estimacion_decesos$registros_dia_60[(j-3):j])
+}
 
 acumulados_varios_<-select(estimacion_decesos,FECHA_DEF,acumulados=acumulados_estimados)
 acumulados_varios_$tipo<-as.factor("Estimados")

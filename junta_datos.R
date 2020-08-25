@@ -2,54 +2,61 @@ serie=list()
 
 #owid_covid<-read.csv(file="owid-covid-data.csv")
 
-
 testos<-dir()[grep(".csv",dir())]
 
+mes<-substr(testos,3,4)
+dia<-substr(testos,5,6)
+fecha<-paste(paste("2020",mes,sep="-"),dia,sep="-")
+
 for (i in 1:length(testos)){
-  print(i)
-  print(testos[i])
+  print (i)
+  print(fecha[i])
   serie[[i]]<-read.csv(testos[i],encoding="UTF-8")
-  serie[[i]]<-filter(serie[[i]],!RESULTADO==2)
-  serie[[i]]$Dia_registro <- i
-  print("dia reg")
-  print(serie[[i]]$Dia_registro[1])
-  print (dim(serie[[i]])[1])
+  serie[[i]]$Dia_registro <- fecha[i]
+  serie[[i]]$Nombre_Estado<-NA
+  serie[[i]]$Abreviatura<-NA
+  x<-which(serie[[i]]$FECHA_DEF=="9999-99-99")
+  serie[[i]]$Def<-0
+  serie[[i]]$Def[-x]<-1 
+  if (i == length(testos)){
+    ultimo_completo<-serie[[i]]
+  }
+  serie[[i]]<-filter(serie[[i]],!RESULTADO==2)%>%select(Dia_registro,ID_REGISTRO,RESULTADO,FECHA_SINTOMAS,FECHA_DEF,
+            UCI,ENTIDAD_RES,MUNICIPIO_RES,SEXO,EDAD,Nombre_Estado,Abreviatura,Def)
 }
 
-datos_juntos<-rbind(serie[[1]],serie[[2]])
+#este se usa cuando se reini]cian los datos
+# datos_resumidos<-serie[[1]]
 
-for (i in 3:length(testos)){
-  #print(dim(datos_juntos))
-  datos_juntos<-rbind(datos_juntos,serie[[i]])
+#for (i in 2:length(serie)){
+#   datos_resumidos<-rbind(datos_resumidos,serie[[i]])
+#}
+
+#este se usa para agregar datos recientes
+
+for (i in 1:length(serie)){
+    print(i)
+    datos_resumidos<-rbind(datos_resumidos,serie[[i]])
 }
 
-print("dimension datos juntos")
-print(dim(datos_juntos))
+rm(dia,mes,fecha,i,testos,serie)
 
-#datos_juntos<-unique(datos_juntos)
-
-datos_resumidos<-select(datos_juntos,Dia_registro,ID_REGISTRO,RESULTADO,FECHA_SINTOMAS,FECHA_DEF,
-                         UCI,ESTADO=ENTIDAD_RES,MUNICIPIO_RES)
-datos_resumidos<-unique(datos_resumidos)
-
-datos_resumidos$Nombre_Estado<-NA
-datos_resumidos$Abreviatura<-NA
-
-ultimo_registro<-unique(filter(datos_juntos,Dia_registro==max(datos_juntos$Dia_registro)))
-ultimo_registro$Nombre_Estado<-NA
-ultimo_registro$Abreviatura<-NA
-
-claves_estados<-read.csv("../claves_edos.csv",encoding = "UTF-8")
+print(dim(datos_resumidos))
+#claves_estados<-read.csv("../claves_edos.csv",encoding = "UTF-8")
 
 for (k in (1:length(claves_estados$CLAVE_ENTIDAD))){
-  x<-which(datos_resumidos$ESTADO==k)
-  y<-which(ultimo_registro$ENTIDAD_RES==k)
+  x<-which(datos_resumidos$ENTIDAD_RES==k)
+  y<-which(ultimo_completo$ENTIDAD_RES==k)
   datos_resumidos$Nombre_Estado[x]<-as.character(claves_estados[k,]$ENTIDAD_FEDERATIVA)
   datos_resumidos$Abreviatura[x]<-as.character(claves_estados[k,]$ABREVIATURA)
-  ultimo_registro$Nombre_Estado[y]<-as.character(claves_estados[k,]$ENTIDAD_FEDERATIVA)
-  ultimo_registro$Abreviatura[y]<-as.character(claves_estados[k,]$ABREVIATURA)
+  ultimo_completo$Nombre_Estado[y]<-as.character(claves_estados[k,]$ENTIDAD_FEDERATIVA)
+  ultimo_completo$Abreviatura[y]<-as.character(claves_estados[k,]$ABREVIATURA)
 }
+print("D")
 
-registro_DEP_COVID<-filter(ultimo_registro,RESULTADO==1,!FECHA_DEF=="9999-99-99")
+x<-which(ultimo_completo$Abreviatura=="MC")
+ultimo_completo$Nombre_Estado[x]<-"EDOMEX"
 
-rm(i,testos,x,y,serie)
+ultimo_registro<-filter(ultimo_completo,!RESULTADO==2)
+
+rm(k,x,y)

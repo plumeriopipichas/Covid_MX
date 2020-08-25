@@ -8,3 +8,5 @@ para_CFR_global$CFR_semanal<-NA
 for (k in 7:nrow(para_CFR_global)){para_CFR_global$CFR_semanal[k]<-
   sum(para_CFR_global$DEP[(k-6):k])/sum(para_CFR_global$cuantos[(k-6):k])}
 para_CFR_global<-para_CFR_global[7:nrow(para_CFR_global), ] 
+
+rm(owid_por_fecha)

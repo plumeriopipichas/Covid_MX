@@ -1,14 +1,14 @@
 etiquetas<-as.data.frame(matrix(data = c("MEX","CFR Mundial"),1,2),stringsAsFactors = FALSE)
 names(etiquetas)<-etiquetas[1, ]
 
-CFR_pais<-ggplot()+geom_line(data=ver_CFR,aes(as.Date(FECHA_SINTOMAS),100*CFR_semanal),size=1.1,color="brown")+
+CFR_pais<-ggplot(Encoding="UTF-8")+geom_line(data=ver_CFR,aes(as.Date(FECHA_SINTOMAS),100*CFR_semanal),size=1.1,color="brown")+
   ggtitle("Evolución del CFR por Covid en México")+ylab("Porcentaje de decesos (ventana de 7 días)")+
   xlab("Fecha de inicio de síntomas")+geom_line(data=para_CFR_global,aes(as.Date(date),100*CFR_semanal))+
   geom_text_repel(data=etiquetas,aes(label="MEX"),x=as.Date(hoy)-25,y=10,color="brown",size=7.1)+ylim(0,22)+
   geom_text_repel(data=etiquetas,aes(label="CFR Mundial"),x=as.Date(hoy)-25,y=4,size=4.3)
 
 compara_CFR_estados<-function(estados){
-  g<-ggplot()
+  g<-ggplot(Encoding="UTF-8")
   contador<-0
   titulo<-"Evolución del CFR por Covid."        
   ye<-numeric()
