@@ -55,7 +55,7 @@ for (k in unique(datos_resumidos$Abreviatura)){
   para_la_estimacion_edos[[k]]<-filter(as.data.frame(decesos_registrados_edos[[k]]),Dia_Def>25,desfase>2)
 
   estimacion_decesos_edos[[k]]<-data.frame(FECHA_DEF=unique(para_la_estimacion_edos[[k]]$FECHA_DEF))
-  for (j in 1:58){
+  for (j in 1:100){
     a<-filter(para_la_estimacion_edos[[k]],desfase==j+2)
     a<-select(a,FECHA_DEF,Decesos_contados)
     estimacion_decesos_edos[[k]]<-merge(estimacion_decesos_edos[[k]],a,by="FECHA_DEF",all.x = TRUE)
@@ -167,7 +167,7 @@ juntos_estados<-rbind(juntos_estados,pegar_global)
 juntos_estados <- merge(juntos_estados,select(poblacion,Abreviatura,Poblacion2010))
 juntos_estados$per_capita<-1000*juntos_estados$acumulados_estimados/juntos_estados$Poblacion2010
 
-estos_ultimos <- filter(juntos_estados,as.Date(FECHA_DEF)==max(as.Date(juntos_estados$FECHA_DEF))-2)
+estos_ultimos <- filter(juntos_estados,as.Date(FECHA_DEF)==max(as.Date(juntos_estados$FECHA_DEF))-3)
 
 # #--------subconjuntos de estados -------------
 

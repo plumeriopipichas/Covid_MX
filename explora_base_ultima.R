@@ -19,13 +19,32 @@ alto_positivo<-filter(municipales,positivos>50)
 CFR_municipal_vs_psaumento <- ggplot(alto_positivo,aes(CFR_municipal,porc_aumento))+geom_point(alpha=0.25)+
   geom_smooth(method="lm")+xlab("CFR por municipio (Defunciones/Positivos)")+ylab("Impacto por Covid 19 en la mortalidad general")
 
-xmorts_DEP<-CFR_municipal_vs_psaumento+
- geom_label_repel(data=filter(alto_positivo,porc_aumento>0.19 | CFR_municipal>0.31),
+xmorts_DEP_<-CFR_municipal_vs_psaumento+
+ geom_label_repel(data=filter(alto_positivo,porc_aumento>0.23 | CFR_municipal>0.31),
                    aes(label=Nombre_municipio),box.padding = 2,point.padding=0.3)+
   ggtitle("Mortalidad por covid a nivel municipal.       Municipios con más de  50 positivos confirmados")
 
 morts_DEP_mg<-CFR_municipal_vs_psaumento+geom_label_repel(data=filter(alto_positivo,Defunciones_2018>3850),
                                               aes(label=Nombre_municipio),box.padding = 1.5,point.padding=0.1)+ggtitle("Mortalidad por covid a nivel municipal")
+
+xmorts_DEP_aa<-CFR_municipal_vs_psaumento+
+  geom_label_repel(data=filter(alto_positivo,porc_aumento>0.23),
+                   aes(label=Nombre_municipio),box.padding = 2,point.padding=0.3)+
+  ggtitle("Mortalidad por covid a nivel municipal.  Mayor aumento en mortalidad entre los Municipios con más de  50 positivos confirmados")
+
+xmorts_DEP_cfr<-CFR_municipal_vs_psaumento+
+  geom_label_repel(data=filter(alto_positivo,CFR_municipal>0.31),
+                   aes(label=Nombre_municipio),box.padding = 2,point.padding=0.3)+
+  ggtitle("Mortalidad por covid a nivel municipal. Mayor CFR en municipios con más de  50 positivos confirmados")
+
+corte_pob<-quantile(alto_positivo$Defunciones_2018,probs = c(seq(0,0.95,0.025),0.97)[40])[[1]]
+
+xmorts_DEP_grandes<-CFR_municipal_vs_psaumento+
+  geom_label_repel(data=filter(alto_positivo,Defunciones_2018>corte_pob),
+                   aes(label=Nombre_municipio),box.padding = 2,point.padding=0.3)+
+  ggtitle("Mortalidad por covid a nivel municipal. Mayor CFR en municipios con más de  50 positivos confirmados")
+
+
 
 
 pcmorts_edos<-list()

@@ -1,56 +1,13 @@
 para_la_estimacion<-filter(as.data.frame(decesos_registrados),Dia_Def>25,desfase>2)
 estimacion_decesos<-data.frame(FECHA_DEF=unique(para_la_estimacion$FECHA_DEF))
 
-for (k in 1:58){
+for (k in 1:100){
   a<-filter(para_la_estimacion,desfase==k+2)
     a<-select(a,FECHA_DEF,Decesos_contados)
     estimacion_decesos<-merge(estimacion_decesos,a,by="FECHA_DEF",all.x = TRUE)
     names(estimacion_decesos)[k+1]<-paste("registros_dia_",as.character(k+2),sep="")
 }
 
-#-----bustrap inicio ------------------
-
-# eles<-7
-# chequeo<-numeric()
-# columnas<-integer()
-# filas<-integer()
-# 
-# for (rous in 10:(nrow(estimacion_decesos)-1)){
-#   for (cols in 3:min((nrow(estimacion_decesos)+2-rous),36)){
-#     a<-estimacion_decesos[(rous-eles):(rous-1),(cols-1):cols]
-#     x<-mean(a[,2]/a[ ,1])*estimacion_decesos[rous,cols-1]-estimacion_decesos[rous,cols]
-#     chequeo<-append(chequeo,x)
-#     columnas<-append(columnas,cols)
-#     filas<-append(filas,rous)
-#   }  
-# }
-# 
-# revisar_estimados<-data.frame(filas,columnas,diferencia=chequeo)
-# por_desfase<-group_by(revisar_estimados,columnas)
-# por_evento<-group_by(revisar_estimados,filas)
-# por_desfase<-summarise(por_desfase,dif=mean(diferencia))
-# por_evento<-summarise(por_evento,dif=mean(diferencia))
-# 
-# ajuste<-c(0,0,por_desfase$dif)
-# 
-# rm(a,x,chequeo,filas,columnas,cols,rous)
-
-#------fin bustrap----
-
-# agrega_diagonal<-function(datos,eles,inicio,ajuste){
-#   B<-as.data.frame(datos)
-#   for (k in inicio:ncol(datos)){
-#     columna<-k
-#     renglon<-nrow(B)-k+inicio
-#     a<-B[(renglon-(eles)):(renglon-1),(columna-1):columna]
-#     a[1,2]<-2*a[1,2]
-#     #a[eles,2]<-2*a[eles,2]
-#     a[ ,2]<-a[ ,2]+0.85
-#     a[ ,1]<-a[ ,1]+1.15
-#     B[renglon,columna]<-max(B[renglon,columna-1]*sum(a[ ,2]/a[ ,1])/8,B[renglon,columna-1])
-#   }
-#   return(B)
-# }
 
 agrega_diagonal_<-function(datos,eles,inicio){
   B<-as.data.frame(datos)
@@ -72,9 +29,9 @@ agrega_diagonal_<-function(datos,eles,inicio){
       }
       if (abs(B[j,(columna-1)]-B[renglon,columna-1])/(B[renglon,columna-1]+0.01)<0.05){
         peso<-2*peso
-      } 
+      }
       pre<-c(pre,rep(B[j,(columna-1)],peso))
-      
+
       pos<-c(pos,rep(B[j,(columna)],peso))
     }
     fit<-lm(pos~pre)
@@ -102,6 +59,13 @@ for (k in 1:(nrow(estimacion_decesos)-1)){
 }
 
 estimacion_decesos$acumulados_estimados<-a
+
+estimacion_decesos<-merge(estimacion_decesos,select(contados_recientes,FECHA_DEF,acumulados_contados),by="FECHA_DEF")
+
+for (k in 1:nrow(estimacion_decesos)){
+  estimacion_decesos$acumulados_estimados[k]<-
+    max(estimacion_decesos$acumulados_estimados[k],estimacion_decesos$acumulados_contados[k])  
+}
 
 estimacion_decesos$tasa_semanal<-NA
 
@@ -133,20 +97,28 @@ for (j in 8:nrow(estimacion_decesos)){
     mean(estimacion_decesos$registros_dia_60[(j-3):j])
 }
 
-acumulados_varios_<-select(estimacion_decesos,FECHA_DEF,acumulados=acumulados_estimados)
-acumulados_varios_$tipo<-as.factor("Estimados")
+conteos_varios<-select(estimacion_decesos,FECHA_DEF,acumulados=acumulados_estimados)
+conteos_varios$tipo<-as.factor("Estimados")
 
 temp<-select(contados_recientes,FECHA_DEF,acumulados=acumulados_contados)
 temp$tipo<-as.factor("Contados")
 
-acumulados_varios_<-rbind(acumulados_varios_,temp)
+conteos_varios<-rbind(conteos_varios,temp)
 
 temp<-select(contados_recientes,FECHA_DEF,acumulados=acumulados.anunciados)
 temp$tipo<-as.factor("Anunciados")
 
-acumulados_varios_<-rbind(acumulados_varios_,temp)
-acumulados_varios_<-filter(acumulados_varios_,as.Date(FECHA_DEF)>"2020-04-11")
+conteos_varios<-rbind(conteos_varios,temp)
+conteos_varios<-filter(conteos_varios,as.Date(FECHA_DEF)>"2020-04-11")
+
+conteos_varios$diarios <- NA
+
+for (k in 2:length(conteos_varios$diarios)){
+  if (conteos_varios$tipo[k]==conteos_varios$tipo[k-1]){
+    conteos_varios$diarios[k]<-conteos_varios$acumulados[k]-conteos_varios$acumulados[k-1]
+  }
+}
 
 # #-----------------------------------------
-# 
-rm(k,para_la_estimacion) 
+#
+rm(k,para_la_estimacion)

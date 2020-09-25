@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(ggrepel)
 
-hoy<-"2020-08-24"
+hoy<-"2020-09-24"
 
 setwd("datos_abiertos_covid")
 

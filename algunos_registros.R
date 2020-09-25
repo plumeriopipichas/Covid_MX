@@ -44,17 +44,20 @@ contados_anteriores<-select(contados_anteriores,-Dia_registro)
 
 a<-rep(contados_anteriores$Decesos_contados[1],length(contados_anteriores$Decesos_contados))
 
+print(length(a))
 for (k in 1:(length(contados_anteriores$Decesos_contados)-1)){
+  print(length(a))
   a[k+1]<-a[k]+contados_anteriores$Decesos_contados[k+1]
+print(length(a))
 }
 
 contados_anteriores$acumulados_contados<-a
 
 compara_2_dias<-merge(contados_recientes,contados_anteriores,by="Dia_Def")
 
-# # 
+# #
 # # #------------retardos en informar
-# 
+#
 por_paciente<-group_by(filter(reg_diarios_decesos,as.Date(FECHA_DEF)>"2020-04-11"),
                        ID_REGISTRO,FECHA_DEF,Nombre_Estado,UCI)
 revisar_retrasos<-summarise(por_paciente,Primer_registro=min(as.Date(Dia_registro)))

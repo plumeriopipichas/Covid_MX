@@ -1,7 +1,5 @@
 library(RColorBrewer)
 
-
-
 compara_acumulados<-ggplot(contados_recientes,aes(acumulados.anunciados,acumulados_contados))+
   geom_point()+geom_line()+geom_segment(x=0,y=0,xend=max(contados_recientes$acumulados_contados),
                                         yend=max(contados_recientes$acumulados_contados),size=2,color="green")+
@@ -15,11 +13,15 @@ compara_acumulados<-ggplot(contados_recientes,aes(acumulados.anunciados,acumulad
 #   xlab("Días transcurridos desde el 18 de marzo")+
 #   ylab("Acumulado de defunciones.")
 
-acumulados_dos_conteos<-ggplot(filter(acumulados_varios_,!tipo=="Estimados"),aes(as.Date(FECHA_DEF),acumulados,color=tipo))+
+acumulados_dos_conteos<-ggplot(filter(conteos_varios,!tipo=="Estimados"),aes(as.Date(FECHA_DEF),acumulados,color=tipo))+
   geom_point(size=2.3)+geom_line()+xlab("Fecha")+ggtitle(paste("Decesos acumulados COVID al ",hoy))
 
-acumulados_tres_conteos<-ggplot(acumulados_varios_,aes(as.Date(FECHA_DEF),acumulados,color=tipo))+
+acumulados_tres_conteos<-ggplot(conteos_varios,aes(as.Date(FECHA_DEF),acumulados,color=tipo))+
   geom_point(size=2.3)+geom_line()+ggtitle(paste("Decesos acumulados por COVID",hoy))+xlab("Fecha")+ylab("Decesos")
+
+diarios_tres_conteos<-ggplot(conteos_varios,aes(as.Date(FECHA_DEF),diarios,color=tipo))+
+  geom_point(size=2.3)+geom_line()+ggtitle(paste("Decesos diarios por COVID",hoy))+xlab("Fecha")+ylab("Decesos")+
+  scale_color_brewer(palette = "Dark2")
 
 # acumulados_tres_conteos_log<-ggplot(acumulados_varios_,aes(as.Date(FECHA_DEF),log(acumulados),color=tipo))+
 #   geom_point(size=2.1)+geom_line()+ggtitle(paste("Decesos acumulados por COVID en México. Escala log.",hoy))+xlab("Fecha")+ylab("Decesos")
@@ -59,9 +61,11 @@ for (k in unique(datos_resumidos$Abreviatura)){
 }
 
 diarios_todos<-
-  ggplot()+geom_point(data=estimacion_decesos,aes(as.Date(FECHA_DEF),por_dia_suave),color="blue")+
-    geom_line(data=estimacion_decesos,aes(as.Date(FECHA_DEF),por_dia_suave),color="blue")+
-    ggtitle("Evolución Covid por dia en México")+ylab("Decesos estimados (promedio 4 dias)")+xlab("Fecha")
+  ggplot()+geom_point(data=estimacion_decesos,aes(as.Date(FECHA_DEF),por_dia_suave),color="aquamarine4")+
+    geom_line(data=estimacion_decesos,aes(as.Date(FECHA_DEF),por_dia_suave),color="aquamarine4")+
+    ggtitle("Evolución Covid por dia en México")+ylab("Decesos estimados")+xlab("Fecha")
+
+
 
 #------------ Lo que sea por estados
 
